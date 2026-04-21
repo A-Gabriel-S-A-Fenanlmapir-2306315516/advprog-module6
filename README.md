@@ -31,3 +31,33 @@ Commit 1 Reflection NotesDalam tahap ini, saya membuat fungsi handle_connection 
 * [cite_start]**Visualisasi**: Sekarang, ketika mengakses `http://127.0.0.1:7878`, browser tidak lagi kosong tetapi menampilkan halaman HTML yang berisi pesan "Hi from Rust"[cite: 1482, 1511].
 
 ![Commit 2 screen capture](/assets/images/commit2.png)
+
+
+# Reflection - Module 6: Concurrency
+
+**Nama:** Gabriel Selwas Aboyaman Fenanlampir  
+**NPM:** 2306315516  
+**Kelas:** Adpro - A  
+
+---
+
+## Commit 1 Reflection Notes
+(Isi refleksi sebelumnya...)
+
+---
+
+## Commit 2 Reflection Notes
+(Isi refleksi sebelumnya...)
+
+---
+
+## Commit 3 Reflection Notes
+
+Pada Milestone 3 ini, saya mengimplementasikan validasi request agar server dapat memberikan respon yang berbeda tergantung pada path yang diminta pengguna:
+
+* **Validasi Request**: Saya menggunakan `request_line` untuk mengecek baris pertama dari HTTP request. [cite_start]Jika baris tersebut adalah `GET / HTTP/1.1`, maka server menganggapnya valid[cite: 1555]. [cite_start]Jika tidak, server akan mengembalikan status 404[cite: 1559].
+* **Refactoring**: Awalnya saya menggunakan blok `if` dan `else` yang memanggil fungsi baca file dan kirim respon di kedua cabangnya. Hal ini menyebabkan duplikasi kode. [cite_start]Saya melakukan refactoring dengan memisahkan logika penentuan status dan nama file ke dalam variabel `(status_line, filename)`.
+* **Keuntungan Refactoring**: Kode menjadi lebih bersih, mudah dibaca, dan meminimalisir kesalahan jika nanti ada perubahan pada cara server mengirimkan respon (cukup mengubah satu tempat saja di akhir fungsi).
+* [cite_start]**Efisiensi**: Sekarang server tidak lagi selalu memberikan file yang sama, melainkan sudah bisa menangani "halaman tidak ditemukan" dengan mengirimkan `404.html`[cite: 1520, 1522].
+
+![Commit 3 screen capture](/assets/images/commit3.png)
