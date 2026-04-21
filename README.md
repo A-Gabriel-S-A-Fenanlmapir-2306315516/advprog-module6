@@ -61,3 +61,14 @@ Pada Milestone 3 ini, saya mengimplementasikan validasi request agar server dapa
 * [cite_start]**Efisiensi**: Sekarang server tidak lagi selalu memberikan file yang sama, melainkan sudah bisa menangani "halaman tidak ditemukan" dengan mengirimkan `404.html`[cite: 1520, 1522].
 
 ![Commit 3 screen capture](/assets/images/commit3.png)
+
+---
+
+## Commit 4 Reflection Notes
+
+Berdasarkan percobaan simulasi *slow response* di atas, berikut adalah analisis saya:
+
+* [cite_start]**Sifat Single-Threaded**: Server ini masih bekerja secara sekuensial (satu per satu). Artinya, server hanya bisa menangani satu request dalam satu waktu.
+* [cite_start]**Blocking Mechanism**: Ketika ada request ke path `/sleep`, server menjalankan `thread::sleep` selama 10 detik[cite: 1556]. [cite_start]Selama waktu tersebut, *main thread* server benar-benar berhenti bekerja dan tidak bisa memproses request lain yang masuk[cite: 1566].
+* **Dampaknya pada User Experience**: Request kedua (ke path utama `/`) terpaksa mengantri di belakang request `/sleep`. [cite_start]Meskipun request kedua seharusnya sangat cepat, ia ikut tertahan (terblokir) karena server sedang sibuk mengerjakan request pertama yang lama.
+* **Kesimpulan**: Model *single-thread* sangat tidak efisien untuk aplikasi dunia nyata di mana banyak pengguna mengakses server secara bersamaan. [cite_start]Jika satu pengguna melakukan proses berat, pengguna lainnya akan mengalami *delay* yang tidak perlu[cite: 1542, 1564].
