@@ -72,3 +72,25 @@ Berdasarkan percobaan simulasi *slow response* di atas, berikut adalah analisis 
 * [cite_start]**Blocking Mechanism**: Ketika ada request ke path `/sleep`, server menjalankan `thread::sleep` selama 10 detik[cite: 1556]. [cite_start]Selama waktu tersebut, *main thread* server benar-benar berhenti bekerja dan tidak bisa memproses request lain yang masuk[cite: 1566].
 * **Dampaknya pada User Experience**: Request kedua (ke path utama `/`) terpaksa mengantri di belakang request `/sleep`. [cite_start]Meskipun request kedua seharusnya sangat cepat, ia ikut tertahan (terblokir) karena server sedang sibuk mengerjakan request pertama yang lama.
 * **Kesimpulan**: Model *single-thread* sangat tidak efisien untuk aplikasi dunia nyata di mana banyak pengguna mengakses server secara bersamaan. [cite_start]Jika satu pengguna melakukan proses berat, pengguna lainnya akan mengalami *delay* yang tidak perlu[cite: 1542, 1564].
+
+
+---
+
+## Commit 5 Reflection Notes
+
+Pada Milestone 5, saya telah mengimplementasikan `ThreadPool` untuk membuat server menjadi multi-threaded. Berikut adalah poin-poin yang saya pelajari:
+
+* [cite_start]**Mekanisme ThreadPool**: Alih-alih membuat thread baru tanpa batas untuk setiap request (yang bisa memicu DoS), `ThreadPool` mengelola sekumpulan thread yang jumlahnya sudah ditentukan sejak awal (pre-allocated)[cite: 215, 1275].
+* **MPSC Channel**: Saya menggunakan `mpsc` (Multiple Producer, Single Consumer) untuk mengirimkan "tugas" (Job) dari main thread ke worker threads. [cite_start]Main thread bertindak sebagai producer yang mengirimkan request, sementara worker threads bertindak sebagai consumers yang mengambil tugas tersebut dari antrian[cite: 874, 1206].
+* [cite_start]**Arc dan Mutex**: Karena banyak worker thread yang perlu mengakses receiver yang sama dari channel secara bergantian, saya menggunakan `Arc` (Atomic Reference Counting) untuk berbagi kepemilikan receiver dan `Mutex` untuk memastikan hanya satu worker yang bisa mengambil tugas di satu waktu (mutual exclusion) agar tidak terjadi race condition[cite: 1132, 1144].
+* [cite_start]**Efisiensi**: Sekarang, server dapat menangani request lain (seperti halaman utama) meskipun ada thread lain yang sedang tertahan oleh proses `/sleep` selama 10 detik[cite: 1573].
+
+---
+
+## Commit Bonus Reflection Notes
+
+Untuk bagian bonus, saya melakukan perbaikan pada fungsi inisialisasi `ThreadPool`:
+
+* **Fungsi `build` sebagai pengganti `new`**: Saya menambahkan fungsi `pub fn build(size: usize) -> Result<ThreadPool, &'static str>`.
+* **Error Handling**: Berbeda dengan fungsi `new` yang menggunakan `assert!` (yang akan memicu `panic!` jika input salah), fungsi `build` mengembalikan `Result`. [cite_start]Jika user memasukkan jumlah thread `0`, fungsi akan mengembalikan `Err`, sehingga program utama bisa menangani error tersebut dengan lebih elegan tanpa harus langsung crash[cite: 1577].
+* **Penerapan**: Ini mengikuti praktik terbaik di Rust untuk membiarkan pemanggil fungsi memutuskan bagaimana menangani kegagalan inisialisasi daripada mematikan seluruh program secara paksa.
